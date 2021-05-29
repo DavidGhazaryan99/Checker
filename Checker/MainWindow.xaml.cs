@@ -77,7 +77,7 @@ namespace Checker
             }
             if (PCSteps == true)
             {
-                int colClicedField;
+                int nextPosstibleColumn;
                 int rowClicedField;
                 for (int i = whiteCheckeredStones.Count - 1; i > 0; i--)
                 {
@@ -85,45 +85,45 @@ namespace Checker
                     int clickedField = GenerateRandomNumber(0, 3);
                     if (clickedField == 1)
                     {
-                        colClicedField = Grid.GetColumn(whiteCheckeredStones[i]) - 1;
+                        nextPosstibleColumn = Grid.GetColumn(whiteCheckeredStones[i]) - 1;
                         rowClicedField = Grid.GetRow(whiteCheckeredStones[i]) + 1;
                     }
                     else
                     {
-                        colClicedField = Grid.GetColumn(whiteCheckeredStones[i]) + 1;
+                        nextPosstibleColumn = Grid.GetColumn(whiteCheckeredStones[i]) + 1;
                         rowClicedField = Grid.GetRow(whiteCheckeredStones[i]) + 1;
                     }
-                    if (colClicedField >= MyGrid.ColumnDefinitions.Count||colClicedField<=0 
+                    if (nextPosstibleColumn >= MyGrid.ColumnDefinitions.Count||nextPosstibleColumn<=0 
                         || rowClicedField >= MyGrid.RowDefinitions.Count||rowClicedField<=0)
                         continue;
-                    if (colClicedField == Grid.GetColumn(whiteCheckeredStones[i]) + 1)
+                    if (nextPosstibleColumn == Grid.GetColumn(whiteCheckeredStones[i]) + 1)
                     {
                         if (rowClicedField == Grid.GetRow(whiteCheckeredStones[i]) + 1
                             && takingASeat[Grid.GetRow(whiteCheckeredStones[i]) + 1][Grid.GetColumn(whiteCheckeredStones[i]) + 1] == 0)
                         {
                             int previousCol = Grid.GetColumn(whiteCheckeredStones[i]);
                             int previousRow = Grid.GetRow(whiteCheckeredStones[i]);
-                            Grid.SetColumn(whiteCheckeredStones[i], colClicedField);
+                            Grid.SetColumn(whiteCheckeredStones[i], nextPosstibleColumn);
                             Grid.SetRow(whiteCheckeredStones[i], rowClicedField);
                             takingASeat[previousRow][previousCol] = 0;
-                            takingASeat[rowClicedField][colClicedField] = 1;
+                            takingASeat[rowClicedField][nextPosstibleColumn] = 1;
                             if (Grid.GetRow(whiteCheckeredStones[i]) != previousRow)
                                 ChangeStones = true;
                         }
                     }
-                    if (colClicedField < 0 || rowClicedField == MyGrid.RowDefinitions.Count + 1)
+                    if (nextPosstibleColumn < 0 || rowClicedField == MyGrid.RowDefinitions.Count + 1)
                         continue;
-                    if (colClicedField == Grid.GetColumn(whiteCheckeredStones[i]) - 1)
+                    if (nextPosstibleColumn == Grid.GetColumn(whiteCheckeredStones[i]) - 1)
                     {
                         if (rowClicedField == Grid.GetRow(whiteCheckeredStones[i]) + 1
                             && takingASeat[Grid.GetRow(whiteCheckeredStones[i]) + 1][Grid.GetColumn(whiteCheckeredStones[i]) - 1] == 0)
                         {
                             int previousCol = Grid.GetColumn(whiteCheckeredStones[i]);
                             int previousRow = Grid.GetRow(whiteCheckeredStones[i]);
-                            Grid.SetColumn(whiteCheckeredStones[i], colClicedField);
+                            Grid.SetColumn(whiteCheckeredStones[i], nextPosstibleColumn);
                             Grid.SetRow(whiteCheckeredStones[i], rowClicedField);
                             takingASeat[previousRow][previousCol] = 0;
-                            takingASeat[rowClicedField][colClicedField] = 1;
+                            takingASeat[rowClicedField][nextPosstibleColumn] = 1;
                             if (Grid.GetRow(whiteCheckeredStones[i]) != previousRow)
                                 ChangeStones = true;
                         }
