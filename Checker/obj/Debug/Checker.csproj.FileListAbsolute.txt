@@ -1,0 +1,15 @@
+C:\Users\Arus\source\repos\Checker\Checker\bin\Debug\Checker.exe.config
+C:\Users\Arus\source\repos\Checker\Checker\bin\Debug\Checker.exe
+C:\Users\Arus\source\repos\Checker\Checker\bin\Debug\Checker.pdb
+C:\Users\Arus\source\repos\Checker\Checker\obj\Debug\MainWindow.g.cs
+C:\Users\Arus\source\repos\Checker\Checker\obj\Debug\App.g.cs
+C:\Users\Arus\source\repos\Checker\Checker\obj\Debug\Checker_MarkupCompile.cache
+C:\Users\Arus\source\repos\Checker\Checker\obj\Debug\Checker_MarkupCompile.lref
+C:\Users\Arus\source\repos\Checker\Checker\obj\Debug\MainWindow.baml
+C:\Users\Arus\source\repos\Checker\Checker\obj\Debug\Checker.g.resources
+C:\Users\Arus\source\repos\Checker\Checker\obj\Debug\Checker.Properties.Resources.resources
+C:\Users\Arus\source\repos\Checker\Checker\obj\Debug\Checker.csproj.GenerateResource.cache
+C:\Users\Arus\source\repos\Checker\Checker\obj\Debug\Checker.csproj.CoreCompileInputs.cache
+C:\Users\Arus\source\repos\Checker\Checker\obj\Debug\Checker.exe
+C:\Users\Arus\source\repos\Checker\Checker\obj\Debug\Checker.pdb
+C:\Users\Arus\source\repos\Checker\Checker\obj\Debug\Checker.csprojAssemblyReference.cache
