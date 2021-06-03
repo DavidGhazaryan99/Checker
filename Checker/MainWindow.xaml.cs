@@ -25,6 +25,7 @@ namespace Checker
         private static object syncObj = new object();
         DispatcherTimer Timer;
 
+
         bool userEatCheked = false;
         bool game = false;
         bool isUserTurn = true;
@@ -32,6 +33,8 @@ namespace Checker
         Border[][] allBorder;
         List<Ellipse> redCheckeredStones = new List<Ellipse>();
         List<Ellipse> whiteCheckeredStones = new List<Ellipse>();
+        List<Ellipse> queenRedStones = new List<Ellipse>();
+        List<Ellipse> queenWhiteStones = new List<Ellipse>();
         int[][] takingASeat;
         int redElementCount = 0;
         int whiteElementCount = 0;
@@ -71,66 +74,90 @@ namespace Checker
         }
         public void PcSteps()
         {
+            for (int i = 0; i < queenWhiteStones.Count; i++)
+            {
+                PcQueenStepsMove1(queenWhiteStones[i]);
+                PcQueenStepsMove2(queenWhiteStones[i]);
+                PcQueenStepsMove3(queenWhiteStones[i]);
+                PcQueenStepsMove4(queenWhiteStones[i]);
+            }
+            for (int i = 0; i < queenWhiteStones.Count; i++)
+            {
+                PcQueenSteps(queenWhiteStones[i]);
+            }
             for (int i = whiteCheckeredStones.Count - 1; i >= 0; i--)
             {
-                EatStones(whiteCheckeredStones[i]);
+                PCEatStones(whiteCheckeredStones[i]);
             }
             if (PCSteps == true)
             {
-                int colClicedField;
-                int rowClicedField;
-                for (int i = whiteCheckeredStones.Count - 1; i > 0; i--)
+                int nextPosstibleColumn;
+                int nextPosstibleRow;
+                for (int i = whiteCheckeredStones.Count - 1; i >= 0; i--)
                 {
                     bool ChangeStones = false;
                     int clickedField = GenerateRandomNumber(0, 3);
                     if (clickedField == 1)
                     {
-                        colClicedField = Grid.GetColumn(whiteCheckeredStones[i]) - 1;
-                        rowClicedField = Grid.GetRow(whiteCheckeredStones[i]) + 1;
+                        nextPosstibleColumn = Grid.GetColumn(whiteCheckeredStones[i]) - 1;
+                        nextPosstibleRow = Grid.GetRow(whiteCheckeredStones[i]) + 1;
                     }
                     else
                     {
-                        colClicedField = Grid.GetColumn(whiteCheckeredStones[i]) + 1;
-                        rowClicedField = Grid.GetRow(whiteCheckeredStones[i]) + 1;
+                        nextPosstibleColumn = Grid.GetColumn(whiteCheckeredStones[i]) + 1;
+                        nextPosstibleRow = Grid.GetRow(whiteCheckeredStones[i]) + 1;
                     }
-                    if (colClicedField >= MyGrid.ColumnDefinitions.Count||colClicedField<=0 
-                        || rowClicedField >= MyGrid.RowDefinitions.Count||rowClicedField<=0)
+                    if (nextPosstibleColumn >= MyGrid.ColumnDefinitions.Count || nextPosstibleColumn <= 0
+                        || nextPosstibleRow >= MyGrid.RowDefinitions.Count || nextPosstibleRow <= 0)
                         continue;
-                    if (colClicedField == Grid.GetColumn(whiteCheckeredStones[i]) + 1)
+                    if (takingASeat[nextPosstibleRow][nextPosstibleColumn] == 0)
                     {
-                        if (rowClicedField == Grid.GetRow(whiteCheckeredStones[i]) + 1
-                            && takingASeat[Grid.GetRow(whiteCheckeredStones[i]) + 1][Grid.GetColumn(whiteCheckeredStones[i]) + 1] == 0)
-                        {
-                            int previousCol = Grid.GetColumn(whiteCheckeredStones[i]);
-                            int previousRow = Grid.GetRow(whiteCheckeredStones[i]);
-                            Grid.SetColumn(whiteCheckeredStones[i], colClicedField);
-                            Grid.SetRow(whiteCheckeredStones[i], rowClicedField);
-                            takingASeat[previousRow][previousCol] = 0;
-                            takingASeat[rowClicedField][colClicedField] = 1;
-                            if (Grid.GetRow(whiteCheckeredStones[i]) != previousRow)
-                                ChangeStones = true;
-                        }
+                        int previousCol = Grid.GetColumn(whiteCheckeredStones[i]);
+                        int previousRow = Grid.GetRow(whiteCheckeredStones[i]);
+                        Grid.SetColumn(whiteCheckeredStones[i], nextPosstibleColumn);
+                        Grid.SetRow(whiteCheckeredStones[i], nextPosstibleRow);
+                        takingASeat[previousRow][previousCol] = 0;
+                        takingASeat[nextPosstibleRow][nextPosstibleColumn] = 1;
+                        if (Grid.GetRow(whiteCheckeredStones[i]) != previousRow)
+                            ChangeStones = true;
                     }
-                    if (colClicedField < 0 || rowClicedField == MyGrid.RowDefinitions.Count + 1)
-                        continue;
-                    if (colClicedField == Grid.GetColumn(whiteCheckeredStones[i]) - 1)
+                    if (Grid.GetRow(whiteCheckeredStones[i]) == MyGrid.RowDefinitions.Count - 1)
                     {
-                        if (rowClicedField == Grid.GetRow(whiteCheckeredStones[i]) + 1
-                            && takingASeat[Grid.GetRow(whiteCheckeredStones[i]) + 1][Grid.GetColumn(whiteCheckeredStones[i]) - 1] == 0)
-                        {
-                            int previousCol = Grid.GetColumn(whiteCheckeredStones[i]);
-                            int previousRow = Grid.GetRow(whiteCheckeredStones[i]);
-                            Grid.SetColumn(whiteCheckeredStones[i], colClicedField);
-                            Grid.SetRow(whiteCheckeredStones[i], rowClicedField);
-                            takingASeat[previousRow][previousCol] = 0;
-                            takingASeat[rowClicedField][colClicedField] = 1;
-                            if (Grid.GetRow(whiteCheckeredStones[i]) != previousRow)
-                                ChangeStones = true;
-                        }
+                        queenWhiteStones.Add(whiteCheckeredStones[i]);
+                        whiteCheckeredStones.Remove(whiteCheckeredStones[i]);
                     }
                     if (ChangeStones == true)
                         break;
                 }
+            }
+        }
+        private void PcQueenSteps(Ellipse ellipse)
+        {
+            if (PCSteps == true)
+            {
+                int nextPosstibleRow = Grid.GetRow(ellipse);
+                int nextPosstibleColumn = Grid.GetColumn(ellipse);
+                int clickedField = GenerateRandomNumber(1, 4);
+                int previousRow = nextPosstibleRow;
+                int previousCol = nextPosstibleColumn;
+                if (clickedField == 1)
+                {
+                    PcQueenStepsMove1(ellipse);
+                }
+                if (clickedField == 2)
+                {
+                    PcQueenStepsMove2(ellipse);
+                }
+                if (clickedField == 3)
+                {
+                    PcQueenStepsMove3(ellipse);
+                }
+                else if (clickedField == 4)
+                {
+                    PcQueenStepsMove4(ellipse);
+                }
+
+
             }
         }
 
@@ -248,15 +275,6 @@ namespace Checker
                             Grid.SetColumn(redCheckeredStones[i], colClicedField);
                             Grid.SetRow(redCheckeredStones[i], rowClicedField);
                             redCheckeredStones[i].Fill = Brushes.Red;
-                            if (colClicedField > 2)
-                            {
-                                allBorder[rowClicedField][colClicedField - 2].Background = Brushes.Black;
-                            }
-                            else if (colClicedField < MyGrid.ColumnDefinitions.Count - 2)
-                            {
-                                allBorder[rowClicedField][colClicedField + 2].Background = Brushes.Black;
-                            }
-                            allBorder[rowClicedField][colClicedField].Background = Brushes.Black;
                             if (previousRow - 2 == rowClicedField && previousCol - 2 == colClicedField)
                             {
                                 for (int j = 0; j < whiteCheckeredStones.Count; j++)
@@ -299,12 +317,244 @@ namespace Checker
                                         allBorder[j][k].Background = Brushes.Black;
                                 }
                             }
+                            if (rowClicedField == 0)
+                            {
+                                queenRedStones.Add(redCheckeredStones[i]);
+                                redCheckeredStones.Remove(redCheckeredStones[i]);
+                            }
+
+                            for (int k = 0; k < queenRedStones.Count; k++)
+                            {
+                                queenRedStones[k].MouseLeftButtonDown -= ClickStones;
+                                queenRedStones[k].MouseLeftButtonDown += ClickQuennRedStones;
+                                queenRedStones[k].Fill = Brushes.DarkRed;
+                            }
+                        }
+                        else if (queenRedStones.Count > 0)
+                        {
+                            for (int x = 0; x < queenRedStones.Count; x++)
+                            {
+                                if (queenRedStones[x].Fill.ToString() == Brushes.Blue.ToString())
+                                {
+                                    int previousCol = Grid.GetColumn(queenRedStones[x]);
+                                    int previousRow = Grid.GetRow(queenRedStones[x]);
+                                    Grid.SetColumn(queenRedStones[x], colClicedField);
+                                    Grid.SetRow(queenRedStones[x], rowClicedField);
+                                    redCheckeredStones[x].Fill = Brushes.Red;
+                                    for (int k = 0; k < MyGrid.RowDefinitions.Count - 1; k++)
+                                    {
+                                        if (previousCol - k > 0 && previousRow - k > 0
+                                            && previousRow - k == rowClicedField && previousCol - k == colClicedField)
+                                        {
+                                            for (int j = 0; j < whiteCheckeredStones.Count; j++)
+                                            {
+                                                int row = Grid.GetRow(whiteCheckeredStones[j]);
+                                                int col = Grid.GetColumn(whiteCheckeredStones[j]);
+                                                if (previousRow - 1 == row && previousCol - 1 == col)
+                                                {
+                                                    if (colClicedField < col && rowClicedField < row)
+                                                    {
+                                                        whiteCheckeredStones[j].Fill = Brushes.Transparent;
+                                                        takingASeat[row][col] = 0;
+                                                        MyGrid.Children.Remove(whiteCheckeredStones[j]);
+                                                        whiteCheckeredStones.Remove(whiteCheckeredStones[j]);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        if (previousRow - k > 0 && previousCol + k < MyGrid.ColumnDefinitions.Count &&
+                                            previousRow - k == rowClicedField && previousCol + k == colClicedField)
+                                        {
+                                            for (int j = 0; j < whiteCheckeredStones.Count; j++)
+                                            {
+                                                int row = Grid.GetRow(whiteCheckeredStones[j]);
+                                                int col = Grid.GetColumn(whiteCheckeredStones[j]);
+                                                if (previousRow - 1 == row && previousCol + 1 == col)
+                                                {
+                                                    if (colClicedField > col && rowClicedField < row)
+                                                    {
+                                                        whiteCheckeredStones[j].Fill = Brushes.Transparent;
+                                                        MyGrid.Children.Remove(whiteCheckeredStones[j]);
+                                                        whiteCheckeredStones.Remove(whiteCheckeredStones[j]);
+                                                        takingASeat[row][col] = 0;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        if (previousRow + k < MyGrid.ColumnDefinitions.Count && previousCol + k < MyGrid.ColumnDefinitions.Count &&
+                                            previousRow + k == rowClicedField && previousCol + k == colClicedField)
+                                        {
+                                            for (int j = 0; j < whiteCheckeredStones.Count; j++)
+                                            {
+                                                int row = Grid.GetRow(whiteCheckeredStones[j]);
+                                                int col = Grid.GetColumn(whiteCheckeredStones[j]);
+                                                if (previousRow + 1 == row && previousCol + 1 == col)
+                                                {
+                                                    if (colClicedField > col && rowClicedField > row)
+                                                    {
+                                                        whiteCheckeredStones[j].Fill = Brushes.Transparent;
+                                                        MyGrid.Children.Remove(whiteCheckeredStones[j]);
+                                                        whiteCheckeredStones.Remove(whiteCheckeredStones[j]);
+                                                        takingASeat[row][col] = 0;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        if (previousRow + k < MyGrid.RowDefinitions.Count && previousCol - k > 0 &&
+                                            previousRow + k == rowClicedField && previousCol - k == colClicedField)
+                                        {
+                                            for (int j = 0; j < whiteCheckeredStones.Count; j++)
+                                            {
+                                                int row = Grid.GetRow(whiteCheckeredStones[j]);
+                                                int col = Grid.GetColumn(whiteCheckeredStones[j]);
+                                                if (previousRow + 1 == row && previousCol - 1 == col)
+                                                {
+                                                    if (rowClicedField > row && colClicedField < col)
+                                                    {
+                                                        whiteCheckeredStones[j].Fill = Brushes.Transparent;
+                                                        MyGrid.Children.Remove(whiteCheckeredStones[j]);
+                                                        whiteCheckeredStones.Remove(whiteCheckeredStones[j]);
+                                                        takingASeat[row][col] = 0;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    takingASeat[previousRow][previousCol] = 0;
+                                    takingASeat[rowClicedField][colClicedField] = 2;
+                                    isUserTurn = false;
+                                    PCSteps = true;
+                                    for (int j = 0; j < allBorder.Length; j++)
+                                    {
+                                        for (int l = 0; l < allBorder[j].Length; l++)
+                                        {
+                                            if (allBorder[j][l].Background == Brushes.Green)
+                                                allBorder[j][l].Background = Brushes.Black;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
 
+        private void ClickQuennRedStones(object sender, RoutedEventArgs e)
+        {
+            if (isUserTurn == true)
+            {
+                for (int i = 0; i < takingASeat.Length; i++)
+                {
+                    for (int j = 0; j < takingASeat[i].Length; j++)
+                    {
+                        if (takingASeat[i][j] == 0 && allBorder[i][j].Background != Brushes.Gray)
+                        {
+                            allBorder[i][j].Background = Brushes.Black;
+                        }
+                    }
+                }
+
+                var clickedElipse = ((Ellipse)sender);
+                clickedElipse.Fill = new SolidColorBrush(Colors.Blue);
+                foreach (Ellipse elipse in redCheckeredStones)
+                {
+                    if (elipse.Equals(clickedElipse) == false)
+                    {
+                        elipse.Fill = new SolidColorBrush(Colors.Red);
+                    }
+                }
+                foreach (Ellipse elipse in queenRedStones)
+                {
+                    if (elipse.Equals(clickedElipse) == false)
+                    {
+                        elipse.Fill = new SolidColorBrush(Colors.Red);
+                    }
+                }
+                int col = Grid.GetColumn(clickedElipse);
+                int row = Grid.GetRow(clickedElipse);
+                for (int i = 0; i < MyGrid.RowDefinitions.Count; i++)
+                {
+                    for (int j = 0; j < MyGrid.ColumnDefinitions.Count; j++)
+                    {
+                        if (row > 0 && col < MyGrid.RowDefinitions.Count - 1 && takingASeat[row - 1][col + 1] != 2 && takingASeat[row - 1][col + 1] != 1)
+                        {
+                            allBorder[row - 1][col + 1].Background = Brushes.Green;
+                            row--; col++;
+                        }
+                        else if (row > 1 && col < MyGrid.RowDefinitions.Count - 2 && takingASeat[row - 1][col + 1] != 2 && takingASeat[row - 1][col + 1] == 1)
+                        {
+                            if (takingASeat[row - 2][col + 2] == 0)
+                            {
+                                allBorder[row - 2][col + 2].Background = Brushes.Green;
+                            }
+                        }
+                    }
+                }
+                row = Grid.GetRow(clickedElipse);
+                col = Grid.GetColumn(clickedElipse);
+                for (int i = 0; i < MyGrid.RowDefinitions.Count; i++)
+                {
+                    for (int j = 0; j < MyGrid.ColumnDefinitions.Count; j++)
+                    {
+                        if (row > 0 && col > 0 && takingASeat[row - 1][col - 1] != 2 && takingASeat[row - 1][col - 1] != 1)
+                        {
+                            allBorder[row - 1][col - 1].Background = Brushes.Green;
+                            row--; col--;
+                        }
+                        else if (row > 1 && col > 1 && takingASeat[row - 1][col - 1] != 2 && takingASeat[row - 1][col - 1] == 1)
+                        {
+                            if (takingASeat[row - 2][col - 2] == 0)
+                            {
+                                allBorder[row - 2][col - 2].Background = Brushes.Green;
+                            }
+                        }
+                    }
+                }
+                row = Grid.GetRow(clickedElipse);
+                col = Grid.GetColumn(clickedElipse);
+                for (int i = 0; i < MyGrid.RowDefinitions.Count; i++)
+                {
+                    for (int j = 0; j < MyGrid.ColumnDefinitions.Count; j++)
+                    {
+                        if (row < MyGrid.RowDefinitions.Count - 1 && col < MyGrid.RowDefinitions.Count - 1
+                            && takingASeat[row + 1][col + 1] != 2 && takingASeat[row + 1][col + 1] != 1)
+                        {
+                            allBorder[row + 1][col + 1].Background = Brushes.Green;
+                            row++; col++;
+                        }
+                        else if (row < MyGrid.RowDefinitions.Count - 2 && col < MyGrid.RowDefinitions.Count - 2
+                            && takingASeat[row + 1][col + 1] != 2 && takingASeat[row + 1][col + 1] == 1)
+                        {
+                            if (takingASeat[row + 2][col + 2] == 0)
+                            {
+                                allBorder[row + 2][col + 2].Background = Brushes.Green;
+                            }
+                        }
+                    }
+                }
+                row = Grid.GetRow(clickedElipse);
+                col = Grid.GetColumn(clickedElipse);
+                for (int i = 0; i < MyGrid.RowDefinitions.Count; i++)
+                {
+                    for (int j = 0; j < MyGrid.ColumnDefinitions.Count; j++)
+                    {
+                        if (row < MyGrid.RowDefinitions.Count - 1 && col > 0 && takingASeat[row + 1][col - 1] != 2 && takingASeat[row + 1][col - 1] != 1)
+                        {
+                            allBorder[row + 1][col - 1].Background = Brushes.Green;
+                            row++; col--;
+                        }
+                        else if (row < MyGrid.RowDefinitions.Count - 2 && col > 1 && takingASeat[row + 1][col - 1] != 2 && takingASeat[row + 1][col - 1] == 1)
+                        {
+                            if (takingASeat[row + 2][col - 2] == 0)
+                            {
+                                allBorder[row + 2][col - 2].Background = Brushes.Green;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         private void ClickStones(object sender, RoutedEventArgs e)
         {
             if (isUserTurn == true)
@@ -323,18 +573,25 @@ namespace Checker
                 clickedElipse.Fill = new SolidColorBrush(Colors.Blue);
                 foreach (Ellipse elipse in redCheckeredStones)
                 {
-                    if (elipse != null && elipse.Equals(clickedElipse) == false)
+                    if (elipse.Equals(clickedElipse) == false)
+                    {
+                        elipse.Fill = new SolidColorBrush(Colors.Red);
+                    }
+                }
+                foreach (Ellipse elipse in queenRedStones)
+                {
+                    if (elipse.Equals(clickedElipse) == false)
                     {
                         elipse.Fill = new SolidColorBrush(Colors.Red);
                     }
                 }
                 int col = Grid.GetColumn(clickedElipse);
                 int row = Grid.GetRow(clickedElipse);
-                if (col < MyGrid.RowDefinitions.Count - 1 && takingASeat[row - 1][col + 1] != 2 && takingASeat[row - 1][col + 1] != 1)
+                if (row >= 0 && col < MyGrid.RowDefinitions.Count - 1 && takingASeat[row - 1][col + 1] != 2 && takingASeat[row - 1][col + 1] != 1)
                 {
                     allBorder[row - 1][col + 1].Background = Brushes.Green;
                 }
-                if (col > 0 && takingASeat[row - 1][col - 1] != 2 && takingASeat[row - 1][col - 1] != 1)
+                if (row >= 0 && col > 0 && takingASeat[row - 1][col - 1] != 2 && takingASeat[row - 1][col - 1] != 1)
                 {
                     allBorder[row - 1][col - 1].Background = Brushes.Green;
                 }
@@ -343,17 +600,18 @@ namespace Checker
         }
         public void EatStonesCheked(Ellipse ellipse)
         {
+
             int col = Grid.GetColumn(ellipse);
             int row = Grid.GetRow(ellipse);
-            if (col <= MyGrid.ColumnDefinitions.Count - 2 && takingASeat[row - 1][col + 1] == 1)
+            if (col < MyGrid.ColumnDefinitions.Count - 2 && takingASeat[row - 1][col + 1] == 1)
             {
-                if (takingASeat[row - 2][col + 2] == 0)
+                if (row != 1 && takingASeat[row - 2][col + 2] == 0)
                 {
                     allBorder[row - 2][col + 2].Background = Brushes.Green;
                     userEatCheked = true;
                 }
             }
-            if (col >= 2 && takingASeat[row - 1][col - 1] == 1)
+            if (row != 1 && col >= 1 && takingASeat[row - 1][col - 1] == 1)
             {
                 if (takingASeat[row - 2][col - 2] == 0)
                 {
@@ -363,7 +621,7 @@ namespace Checker
             }
 
         }
-        public void EatStones(Ellipse ellipse)
+        public void PCEatStones(Ellipse ellipse)
         {
             int col = Grid.GetColumn(ellipse);
             int row = Grid.GetRow(ellipse);
@@ -422,6 +680,11 @@ namespace Checker
                     }
                 }
             }
+            if (Grid.GetRow(ellipse) == MyGrid.RowDefinitions.Count - 1)
+            {
+                queenWhiteStones.Add(ellipse);
+                whiteCheckeredStones.Remove(ellipse);
+            }
         }
 
         public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
@@ -442,7 +705,278 @@ namespace Checker
                 }
             }
         }
-
+        private void PcQueenStepsMove1(Ellipse ellipse)
+        {
+            if (PCSteps == true)
+            {
+                int nextPosstibleRow = Grid.GetRow(ellipse);
+                int nextPosstibleColumn = Grid.GetColumn(ellipse);
+                int previousRow = nextPosstibleRow;
+                int previousCol = nextPosstibleColumn;
+                for (int k = 0; k < MyGrid.RowDefinitions.Count; k++)
+                {
+                    for (int j = 0; j < MyGrid.ColumnDefinitions.Count; j++)
+                    {
+                        if (nextPosstibleRow > 0 && nextPosstibleColumn < MyGrid.RowDefinitions.Count - 1 && takingASeat[nextPosstibleRow - 1][nextPosstibleColumn + 1] != 2 && takingASeat[nextPosstibleRow - 1][nextPosstibleColumn + 1] != 1)
+                        {
+                            takingASeat[nextPosstibleRow][nextPosstibleColumn] = 0;
+                            nextPosstibleColumn++;
+                            nextPosstibleRow--;
+                            Grid.SetColumn(ellipse, nextPosstibleColumn);
+                            Grid.SetRow(ellipse, nextPosstibleRow);
+                            takingASeat[nextPosstibleRow][nextPosstibleColumn] = 1;
+                        }
+                        else if (nextPosstibleRow > 1 && nextPosstibleColumn < MyGrid.RowDefinitions.Count - 2 && takingASeat[nextPosstibleRow - 1][nextPosstibleColumn + 1] == 2 && takingASeat[nextPosstibleRow - 1][nextPosstibleColumn + 1] != 1)
+                        {
+                            if (takingASeat[nextPosstibleRow - 2][nextPosstibleColumn + 2] == 0)
+                            {
+                                for (int i = 0; i < redCheckeredStones.Count; i++)
+                                {
+                                    int row = Grid.GetRow(redCheckeredStones[i]);
+                                    int col = Grid.GetColumn(redCheckeredStones[i]);
+                                    if (row == nextPosstibleRow - 1 && col == nextPosstibleColumn + 1)
+                                    {
+                                        redCheckeredStones[i].Fill = Brushes.Transparent;
+                                        MyGrid.Children.Remove(redCheckeredStones[i]);
+                                        redCheckeredStones.Remove(redCheckeredStones[i]);
+                                        takingASeat[row][col] = 0;
+                                    }
+                                }
+                                for (int i = 0; i < queenRedStones.Count; i++)
+                                {
+                                    int row = Grid.GetRow(queenRedStones[i]);
+                                    int col = Grid.GetColumn(queenRedStones[i]);
+                                    if (row == nextPosstibleRow - 1 && col == nextPosstibleColumn + 1)
+                                    {
+                                        redCheckeredStones[i].Fill = Brushes.Transparent;
+                                        MyGrid.Children.Remove(queenRedStones[i]);
+                                        queenRedStones.Remove(queenRedStones[i]);
+                                        takingASeat[row][col] = 0;
+                                    }
+                                }
+                                takingASeat[nextPosstibleRow][nextPosstibleColumn] = 0;
+                                nextPosstibleRow -= 2;
+                                nextPosstibleColumn += 2;
+                                Grid.SetColumn(ellipse, nextPosstibleColumn);
+                                Grid.SetRow(ellipse, nextPosstibleRow);
+                                takingASeat[nextPosstibleRow][nextPosstibleColumn] = 1;
+                                goto link1 ;
+                            }
+                        }
+                    }
+                }
+                link1:
+                if (previousRow != Grid.GetRow(ellipse) && previousCol != Grid.GetColumn(ellipse))
+                {
+                    isUserTurn = true;
+                    PCSteps = false;
+                }
+            }
+        }
+        private void PcQueenStepsMove2(Ellipse ellipse)
+        {
+            if (PCSteps == true)
+            {
+                int nextPosstibleRow = Grid.GetRow(ellipse);
+                int nextPosstibleColumn = Grid.GetColumn(ellipse);
+                int previousRow = nextPosstibleRow;
+                int previousCol = nextPosstibleColumn;
+                for (int k = 0; k < MyGrid.RowDefinitions.Count; k++)
+                {
+                    for (int j = 0; j < MyGrid.ColumnDefinitions.Count; j++)
+                    {
+                        if (nextPosstibleRow < MyGrid.RowDefinitions.Count - 1 && nextPosstibleColumn > 0 && takingASeat[nextPosstibleRow + 1][nextPosstibleColumn - 1] != 2 && takingASeat[nextPosstibleRow + 1][nextPosstibleColumn - 1] != 1)
+                        {
+                            takingASeat[nextPosstibleRow][nextPosstibleColumn] = 0;
+                            nextPosstibleColumn--;
+                            nextPosstibleRow++;
+                            Grid.SetColumn(ellipse, nextPosstibleColumn);
+                            Grid.SetRow(ellipse, nextPosstibleRow);
+                            takingASeat[nextPosstibleRow][nextPosstibleColumn] = 1;
+                        }
+                        else if (nextPosstibleRow < MyGrid.RowDefinitions.Count - 2 && nextPosstibleColumn > 1 && takingASeat[nextPosstibleRow + 1][nextPosstibleColumn - 1] == 2 && takingASeat[nextPosstibleRow + 1][nextPosstibleColumn - 1] != 1)
+                        {
+                            if (takingASeat[nextPosstibleRow + 2][nextPosstibleColumn - 2] == 0)
+                            {
+                                for (int i = 0; i < redCheckeredStones.Count; i++)
+                                {
+                                    int row = Grid.GetRow(redCheckeredStones[i]);
+                                    int col = Grid.GetColumn(redCheckeredStones[i]);
+                                    if (row == nextPosstibleRow + 1 && col == nextPosstibleColumn - 1)
+                                    {
+                                        redCheckeredStones[i].Fill = Brushes.Transparent;
+                                        MyGrid.Children.Remove(redCheckeredStones[i]);
+                                        redCheckeredStones.Remove(redCheckeredStones[i]);
+                                        takingASeat[row][col] = 0;
+                                    }
+                                }
+                                for (int i = 0; i < queenRedStones.Count; i++)
+                                {
+                                    int row = Grid.GetRow(queenRedStones[i]);
+                                    int col = Grid.GetColumn(queenRedStones[i]);
+                                    if (row == nextPosstibleRow + 1 && col == nextPosstibleColumn - 1)
+                                    {
+                                        redCheckeredStones[i].Fill = Brushes.Transparent;
+                                        MyGrid.Children.Remove(queenRedStones[i]);
+                                        queenRedStones.Remove(queenRedStones[i]);
+                                        takingASeat[row][col] = 0;
+                                    }
+                                }
+                                takingASeat[nextPosstibleRow][nextPosstibleColumn] = 0;
+                                nextPosstibleRow += 2;
+                                nextPosstibleColumn -= 2;
+                                Grid.SetColumn(ellipse, nextPosstibleColumn);
+                                Grid.SetRow(ellipse, nextPosstibleRow);
+                                takingASeat[nextPosstibleRow][nextPosstibleColumn] = 1;
+                                goto link1;
+                            }
+                        }
+                    }
+                }
+                link1:
+                if (previousRow != Grid.GetRow(ellipse) && previousCol != Grid.GetColumn(ellipse))
+                {
+                    isUserTurn = true;
+                    PCSteps = false;
+                }
+            }
+        }
+        private void PcQueenStepsMove3(Ellipse ellipse)
+        {
+            if (PCSteps == true)
+            {
+                int nextPosstibleRow = Grid.GetRow(ellipse);
+                int nextPosstibleColumn = Grid.GetColumn(ellipse);
+                int previousRow = nextPosstibleRow;
+                int previousCol = nextPosstibleColumn;
+                for (int k = 0; k < MyGrid.RowDefinitions.Count; k++)
+                {
+                    for (int j = 0; j < MyGrid.ColumnDefinitions.Count; j++)
+                    {
+                        if (nextPosstibleRow > 0 && nextPosstibleColumn > 0 && takingASeat[nextPosstibleRow - 1][nextPosstibleColumn - 1] != 2 && takingASeat[nextPosstibleRow - 1][nextPosstibleColumn - 1] != 1)
+                        {
+                            takingASeat[nextPosstibleRow][nextPosstibleColumn] = 0;
+                            nextPosstibleColumn--;
+                            nextPosstibleRow--;
+                            Grid.SetColumn(ellipse, nextPosstibleColumn);
+                            Grid.SetRow(ellipse, nextPosstibleRow);
+                            takingASeat[nextPosstibleRow][nextPosstibleColumn] = 1;
+                        }
+                        else if (nextPosstibleRow > 1 && nextPosstibleColumn > 1 && takingASeat[nextPosstibleRow - 1][nextPosstibleColumn - 1] == 2 && takingASeat[nextPosstibleRow - 1][nextPosstibleColumn - 1] != 1)
+                        {
+                            if (takingASeat[nextPosstibleRow - 2][nextPosstibleColumn - 2] == 0)
+                            {
+                                for (int i = 0; i < redCheckeredStones.Count; i++)
+                                {
+                                    int row = Grid.GetRow(redCheckeredStones[i]);
+                                    int col = Grid.GetColumn(redCheckeredStones[i]);
+                                    if (row == nextPosstibleRow - 1 && col == nextPosstibleColumn - 1)
+                                    {
+                                        redCheckeredStones[i].Fill = Brushes.Transparent;
+                                        MyGrid.Children.Remove(redCheckeredStones[i]);
+                                        redCheckeredStones.Remove(redCheckeredStones[i]);
+                                        takingASeat[row][col] = 0;
+                                    }
+                                }
+                                for (int i = 0; i < queenRedStones.Count; i++)
+                                {
+                                    int row = Grid.GetRow(queenRedStones[i]);
+                                    int col = Grid.GetColumn(queenRedStones[i]);
+                                    if (row == nextPosstibleRow - 1 && col == nextPosstibleColumn - 1)
+                                    {
+                                        redCheckeredStones[i].Fill = Brushes.Transparent;
+                                        MyGrid.Children.Remove(queenRedStones[i]);
+                                        queenRedStones.Remove(queenRedStones[i]);
+                                        takingASeat[row][col] = 0;
+                                    }
+                                }
+                                takingASeat[nextPosstibleRow][nextPosstibleColumn] = 0;
+                                nextPosstibleRow -= 2;
+                                nextPosstibleColumn -= 2;
+                                Grid.SetColumn(ellipse, nextPosstibleColumn);
+                                Grid.SetRow(ellipse, nextPosstibleRow);
+                                takingASeat[nextPosstibleRow][nextPosstibleColumn] = 1;
+                                goto link1;
+                            }
+                        }
+                    }
+                }
+                link1:
+                if (previousRow != Grid.GetRow(ellipse) && previousCol != Grid.GetColumn(ellipse))
+                {
+                    isUserTurn = true;
+                    PCSteps = false;
+                }
+            }
+        }
+        private void PcQueenStepsMove4(Ellipse ellipse)
+        {
+            if (PCSteps == true)
+            {
+                int nextPosstibleRow = Grid.GetRow(ellipse);
+                int nextPosstibleColumn = Grid.GetColumn(ellipse);
+                int previousRow = nextPosstibleRow;
+                int previousCol = nextPosstibleColumn;
+                for (int k = 0; k < MyGrid.RowDefinitions.Count; k++)
+                {
+                    for (int j = 0; j < MyGrid.ColumnDefinitions.Count; j++)
+                    {
+                        if (nextPosstibleRow < MyGrid.RowDefinitions.Count - 1 && nextPosstibleColumn < MyGrid.RowDefinitions.Count - 1 && takingASeat[nextPosstibleRow + 1][nextPosstibleColumn + 1] != 2 && takingASeat[nextPosstibleRow + 1][nextPosstibleColumn + 1] != 1)
+                        {
+                            takingASeat[nextPosstibleRow][nextPosstibleColumn] = 0;
+                            nextPosstibleColumn++;
+                            nextPosstibleRow++;
+                            Grid.SetColumn(ellipse, nextPosstibleColumn);
+                            Grid.SetRow(ellipse, nextPosstibleRow);
+                            takingASeat[nextPosstibleRow][nextPosstibleColumn] = 1;
+                        }
+                        else if (nextPosstibleRow < MyGrid.RowDefinitions.Count - 2 && nextPosstibleColumn < MyGrid.RowDefinitions.Count - 2 && takingASeat[nextPosstibleRow + 1][nextPosstibleColumn + 1] == 2 && takingASeat[nextPosstibleRow + 1][nextPosstibleColumn + 1] != 1)
+                        {
+                            if (takingASeat[nextPosstibleRow + 2][nextPosstibleColumn + 2] == 0)
+                            {
+                                for (int i = 0; i < redCheckeredStones.Count; i++)
+                                {
+                                    int row = Grid.GetRow(redCheckeredStones[i]);
+                                    int col = Grid.GetColumn(redCheckeredStones[i]);
+                                    if (row == nextPosstibleRow + 1 && col == nextPosstibleColumn + 1)
+                                    {
+                                        redCheckeredStones[i].Fill = Brushes.Transparent;
+                                        MyGrid.Children.Remove(redCheckeredStones[i]);
+                                        redCheckeredStones.Remove(redCheckeredStones[i]);
+                                        takingASeat[row][col] = 0;
+                                    }
+                                }
+                                for (int i = 0; i < queenRedStones.Count; i++)
+                                {
+                                    int row = Grid.GetRow(queenRedStones[i]);
+                                    int col = Grid.GetColumn(queenRedStones[i]);
+                                    if (row == nextPosstibleRow + 1 && col == nextPosstibleColumn + 1)
+                                    {
+                                        redCheckeredStones[i].Fill = Brushes.Transparent;
+                                        MyGrid.Children.Remove(queenRedStones[i]);
+                                        queenRedStones.Remove(queenRedStones[i]);
+                                        takingASeat[row][col] = 0;
+                                    }
+                                }
+                                takingASeat[nextPosstibleRow][nextPosstibleColumn] = 0;
+                                nextPosstibleRow += 2;
+                                nextPosstibleColumn += 2;
+                                Grid.SetColumn(ellipse, nextPosstibleColumn);
+                                Grid.SetRow(ellipse, nextPosstibleRow);
+                                takingASeat[nextPosstibleRow][nextPosstibleColumn] = 1;
+                                goto link1;
+                            }
+                        }
+                    }
+                }
+                link1:
+                if (previousRow != Grid.GetRow(ellipse) && previousCol != Grid.GetColumn(ellipse))
+                {
+                    isUserTurn = true;
+                    PCSteps = false;
+                }
+            }
+        }
         private static void InitRandomNumber(int seed)
         {
             random = new Random(seed);
